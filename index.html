@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FORJA — Entrenamiento en casa</title>
+<style>
+  :root{
+    --bg: #14110f;
+    --bg-soft: #1c1815;
+    --card: #211c18;
+    --line: #322b25;
+    --iron: #8a8178;
+    --paper: #f2ede4;
+    --ember: #ff5a2b;
+    --ember-dim: #c4441f;
+    --steel: #5b7b8a;
+    --gold: #d9a441;
+    --ok: #6fae6a;
+    --font-display: 'Bebas', 'Arial Narrow', sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'SF Mono', 'Courier New', monospace;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at top, #221c17 0%, var(--bg) 55%),
+      repeating-linear-gradient(135deg, rgba(255,90,43,0.025) 0px, rgba(255,90,43,0.025) 2px, transparent 2px, transparent 40px);
+    color: var(--paper);
+    font-family: var(--font-body);
+    min-height:100vh;
+    padding-bottom: 40px;
+  }
+
+  /* ---------- Display type built from condensed system stack ---------- */
+  h1, h2, h3, .display{
+    font-family: var(--font-body);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    font-stretch: condensed;
+  }
+
+  /* ---------- HEADER ---------- */
+  header{
+    padding: 22px 18px 16px;
+    position: relative;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand-row{
+    display:flex; justify-content:space-between; align-items:flex-start;
+  }
+  .brand{
+    font-size: 30px;
+    line-height: 0.9;
+    color: var(--paper);
+  }
+  .brand span{ color: var(--ember); }
+  .tagline{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--iron);
+    margin-top: 4px;
+  }
+  .date-chip{
+    text-align:right;
+    font-family: var(--font-mono);
+  }
+  .header-right{
+    display:flex;
+    align-items:flex-start;
+    gap: 10px;
+  }
+  .settings-btn{
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--iron);
+    font-size: 16px;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+  .settings-btn:active{ background: var(--ember); color: #1a0d06; border-color: var(--ember); }
+  .date-chip .day-num{
+    font-size: 34px;
+    font-weight: 800;
+    color: var(--gold);
+    line-height: 0.85;
+  }
+  .date-chip .day-meta{
+    font-size: 10px;
+    color: var(--iron);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+
+  .streak-bar{
+    margin-top: 16px;
+    display:flex; gap:6px;
+  }
+  .streak-bar .dot{
+    flex:1;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+  }
+  .streak-bar .dot.done{ background: var(--ember); border-color: var(--ember); }
+  .streak-bar .dot.today{ box-shadow: 0 0 0 2px var(--gold) inset; }
+
+  /* ---------- DAY NAV ---------- */
+  .day-nav{
+    display:flex;
+    overflow-x:auto;
+    gap: 8px;
+    padding: 16px 18px 4px;
+    scrollbar-width: none;
+  }
+  .day-nav::-webkit-scrollbar{ display:none; }
+  .day-pill{
+    flex: 0 0 auto;
+    padding: 9px 14px;
+    border-radius: 10px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--iron);
+    cursor:pointer;
+    position: relative;
+    white-space: nowrap;
+  }
+  .day-pill .num{ display:block; font-size:9px; opacity:0.6; }
+  .day-pill.active{
+    background: var(--ember);
+    border-color: var(--ember);
+    color: #1a0d06;
+    font-weight: 700;
+  }
+  .day-pill.is-today:not(.active){
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .day-pill.complete::after{
+    content: '✓';
+    position:absolute; top:-6px; right:-6px;
+    width:16px; height:16px; border-radius:50%;
+    background: var(--ok); color:#0b1c0a;
+    font-size: 10px; display:flex; align-items:center; justify-content:center;
+    border: 2px solid var(--bg);
+  }
+
+  /* ---------- MAIN ---------- */
+  main{ padding: 18px; }
+
+  .session-card{
+    background: linear-gradient(180deg, var(--card), var(--bg-soft));
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 18px;
+    position: relative;
+    overflow:hidden;
+  }
+  .session-card::before{
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--ember), var(--gold));
+  }
+  .session-head{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    margin-bottom: 14px;
+  }
+  .session-title{
+    font-size: 26px;
+    color: var(--paper);
+  }
+  .session-sub{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ember);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+  .session-meta{
+    text-align:right;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--iron);
+    line-height: 1.6;
+  }
+
+  .rest-card{
+    text-align:center;
+    padding: 50px 20px;
+  }
+  .rest-card .glyph{ font-size: 40px; margin-bottom: 10px; }
+  .rest-card h2{ font-size: 24px; color: var(--steel); }
+  .rest-card p{ color: var(--iron); font-size: 14px; max-width: 320px; margin: 8px auto 0; line-height:1.5; }
+
+  /* ---------- EXERCISE LIST ---------- */
+  .exercise{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    padding: 13px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+  .exercise:last-child{ border-bottom:none; }
+  .check{
+    flex: 0 0 30px;
+    width: 30px; height:30px;
+    border-radius: 8px;
+    border: 2px solid var(--line);
+    background: var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    font-size: 15px;
+    color: transparent;
+    transition: all .15s ease;
+  }
+  .check.checked{
+    background: var(--ember);
+    border-color: var(--ember);
+    color: #1a0d06;
+  }
+  .ex-info{ flex:1; min-width:0; }
+  .ex-name{
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--paper);
+  }
+  .ex-name.checked{ color: var(--iron); text-decoration: line-through; text-decoration-color: var(--ember); }
+  .ex-tags{
+    display:flex; gap:6px; margin-top:4px;
+  }
+  .ex-tag{
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--iron);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 1px 6px;
+  }
+  .ex-tag.eq{ color: var(--steel); border-color: rgba(91,123,138,0.4); }
+  .ex-scheme{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gold);
+    text-align:right;
+    flex: 0 0 auto;
+    line-height: 1.3;
+  }
+  .ex-scheme small{ display:block; font-size: 9px; color: var(--iron); }
+
+  .complete-btn{
+    width:100%;
+    margin-top: 16px;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--bg-soft);
+    color: var(--iron);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--line);
+  }
+  .complete-btn.ready{
+    background: var(--ember);
+    color: #1a0d06;
+    border-color: var(--ember);
+  }
+
+  /* ---------- HISTORY ---------- */
+  .section-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--iron);
+    margin: 4px 0 12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-label::after{
+    content:''; flex:1; height:1px; background: var(--line);
+  }
+
+  .history-grid{
+    display:grid;
+    grid-template-columns: repeat(15, 1fr);
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .hist-cell{
+    aspect-ratio: 1;
+    border-radius: 4px;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+  }
+  .hist-cell.done{ background: var(--ember); border-color: var(--ember); }
+  .hist-cell.rest-day{ background: rgba(91,123,138,0.25); border-color: rgba(91,123,138,0.3); }
+  .hist-labels{
+    display:flex; justify-content:space-between;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--iron);
+    margin-bottom: 18px;
+  }
+
+  .stats-row{
+    display:flex; gap:10px; margin-bottom: 24px;
+  }
+  .stat{
+    flex:1;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    text-align:center;
+  }
+  .stat .num{ font-size: 22px; font-weight:800; color: var(--ember); font-family: var(--font-mono); }
+  .stat .lbl{ font-size: 9px; color: var(--iron); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+  footer{
+    text-align:center;
+    padding: 20px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--iron);
+    letter-spacing: 0.08em;
+  }
+
+  /* ---------- COOKIE BANNER ---------- */
+  .cookie-banner{
+    position: fixed;
+    left: 12px; right: 12px; bottom: 12px;
+    background: var(--bg-soft);
+    border: 1px solid var(--ember);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    z-index: 999;
+    animation: slideUp .4s ease;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  @keyframes slideUp{ from{ transform: translateY(120%); opacity:0; } to{ transform: translateY(0); opacity:1; } }
+  .cookie-banner .ico{ font-size: 22px; margin-bottom: 6px; }
+  .cookie-banner h3{
+    font-size: 16px;
+    color: var(--paper);
+    margin: 0 0 6px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .cookie-banner p{
+    font-size: 12.5px;
+    color: var(--iron);
+    line-height: 1.5;
+    margin: 0 0 14px;
+  }
+  .cookie-banner p b{ color: var(--gold); }
+  .cookie-actions{ display:flex; gap:10px; }
+  .cookie-actions button{
+    flex:1;
+    padding: 11px;
+    border-radius: 10px;
+    border: none;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-accept{ background: var(--ember); color: #1a0d06; }
+  .btn-decline{ background: transparent; border: 1px solid var(--line) !important; color: var(--iron); }
+
+  .toast{
+    position: fixed;
+    top: 16px; left: 50%;
+    transform: translateX(-50%) translateY(-150%);
+    background: var(--ok);
+    color: #0b1c0a;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 1000;
+    transition: transform .3s ease;
+    white-space: nowrap;
+  }
+  .toast.show{ transform: translateX(-50%) translateY(0); }
+
+  /* ---------- TIMER MODAL ---------- */
+  .exercise{ cursor:pointer; }
+  .timer-overlay{
+    position: fixed; inset: 0;
+    background: rgba(10,8,6,0.92);
+    backdrop-filter: blur(6px);
+    z-index: 1100;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding: 20px;
+  }
+  .timer-overlay.show{ display:flex; }
+  .timer-card{
+    width: 100%;
+    max-width: 340px;
+    text-align:center;
+    position: relative;
+  }
+  .timer-close{
+    position:absolute; top:-10px; right:-4px;
+    width: 36px; height:36px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--iron);
+    font-size: 15px;
+    cursor:pointer;
+  }
+  .timer-exname{
+    font-family: var(--font-body);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    font-size: 19px;
+    color: var(--paper);
+    margin-bottom: 4px;
+    padding: 0 30px;
+  }
+  .timer-setcount{
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--iron);
+    margin-bottom: 24px;
+  }
+  .timer-ring-wrap{
+    position: relative;
+    width: 220px; height: 220px;
+    margin: 0 auto;
+  }
+  .timer-ring{
+    width: 220px; height: 220px;
+    transform: rotate(-90deg);
+  }
+  .ring-bg{
+    fill: none;
+    stroke: var(--bg-soft);
+    stroke-width: 10;
+  }
+  .ring-fg{
+    fill: none;
+    stroke: var(--ember);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 553;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear, stroke .3s ease;
+  }
+  .timer-overlay.resting .ring-fg{ stroke: var(--steel); }
+  .timer-center{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+  }
+  .timer-phase{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: var(--ember);
+    margin-bottom: 6px;
+  }
+  .timer-overlay.resting .timer-phase{ color: var(--steel); }
+  .timer-num{
+    font-family: var(--font-mono);
+    font-size: 56px;
+    font-weight: 800;
+    color: var(--paper);
+    line-height: 1;
+  }
+  .timer-controls{
+    display:flex; gap: 10px;
+    margin-top: 28px;
+  }
+  .tbtn{
+    flex:1;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--paper);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .tbtn-skip{ background: var(--bg-soft); color: var(--iron); }
+
+  /* ---------- SETTINGS MODAL ---------- */
+  .settings-overlay{
+    position: fixed; inset: 0;
+    background: rgba(10,8,6,0.92);
+    backdrop-filter: blur(6px);
+    z-index: 1100;
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+  }
+  .settings-overlay.show{ display:flex; }
+  .settings-card{
+    width: 100%;
+    max-width: 480px;
+    max-height: 88vh;
+    overflow-y: auto;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-bottom: none;
+    border-radius: 20px 20px 0 0;
+    padding: 18px 18px 28px;
+  }
+  .settings-header{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 14px;
+  }
+  .settings-header .timer-close{ position:static; }
+  .settings-title{
+    font-size: 24px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--paper);
+  }
+  .settings-day-nav{
+    padding: 0 0 12px;
+    margin: 0 0 4px;
+    border-bottom: 1px solid var(--line);
+  }
+  .rest-toggle-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 12px 4px;
+    font-size: 13px;
+    color: var(--paper);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 6px;
+  }
+  .switch{ position:relative; width:44px; height:26px; display:inline-block; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .switch-track{
+    position:absolute; inset:0;
+    background: var(--line);
+    border-radius: 20px;
+    cursor:pointer;
+    transition: background .2s;
+  }
+  .switch-track::before{
+    content:'';
+    position:absolute; left:3px; top:3px;
+    width:20px; height:20px;
+    background: var(--paper);
+    border-radius:50%;
+    transition: transform .2s;
+  }
+  .switch input:checked + .switch-track{ background: var(--ember); }
+  .switch input:checked + .switch-track::before{ transform: translateX(18px); }
+
+  .settings-list{ margin-bottom: 8px; }
+  .settings-ex{
+    border-bottom: 1px solid var(--line);
+    padding: 12px 4px;
+  }
+  .settings-ex-head{
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .settings-ex-name{
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--paper);
+    flex: 1;
+  }
+  .del-btn{
+    flex: 0 0 auto;
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--ember-dim);
+    font-size: 13px;
+    cursor:pointer;
+  }
+  .settings-ex-fields{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .field-group{ display:flex; flex-direction:column; gap:3px; }
+  .field-group label{
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--iron);
+  }
+  .set-input{
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--paper);
+    padding: 8px;
+    font-size: 13px;
+    font-family: var(--font-body);
+    width: 100%;
+  }
+  .set-input:focus{ outline: none; border-color: var(--ember); }
+  .set-input-num{ font-family: var(--font-mono); }
+
+  .add-ex-form{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px;
+    margin: 14px 0;
+  }
+  .set-input-wide{ margin-bottom: 8px; }
+  .add-ex-row{ display:flex; gap:8px; margin-bottom:8px; }
+  .add-ex-row .set-input{ flex:1; }
+
+  .reset-link{
+    display:block;
+    width:100%;
+    background: none;
+    border: none;
+    color: var(--iron);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 10px;
+    cursor: pointer;
+  }
+
+  @media (min-width: 520px){
+    main{ max-width: 480px; margin: 0 auto; }
+    header{ max-width: 480px; margin: 0 auto; }
+    .day-nav{ max-width: 480px; margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<header>
+  <div class="brand-row">
+    <div>
+      <div class="brand">FOR<span>JA</span></div>
+      <div class="tagline">Fuerza · Agilidad · En tu cuarto</div>
+    </div>
+    <div class="header-right">
+      <button class="settings-btn" id="openSettings" aria-label="Ajustes">⚙</button>
+      <div class="date-chip">
+        <div class="day-num" id="todayNum">--</div>
+        <div class="day-meta" id="todayMeta">--</div>
+      </div>
+    </div>
+  </div>
+  <div class="streak-bar" id="weekStreak"></div>
+</header>
+
+<nav class="day-nav" id="dayNav"></nav>
+
+<main>
+  <div id="sessionContainer"></div>
+
+  <div class="section-label">Últimos 15 días</div>
+  <div class="history-grid" id="historyGrid"></div>
+  <div class="hist-labels"><span id="histStart">hace 15 días</span><span>hoy</span></div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="num" id="statStreak">0</div><div class="lbl">Racha actual</div></div>
+    <div class="stat"><div class="num" id="statDone">0</div><div class="lbl">Sesiones / 15d</div></div>
+    <div class="stat"><div class="num" id="statRate">0%</div><div class="lbl">Cumplimiento</div></div>
+  </div>
+</main>
+
+<footer>FORJA · entrenamiento de habitación · mancuernas + peso corporal</footer>
+
+<div class="cookie-banner" id="cookieBanner" style="display:none;">
+  <div class="ico">🍪</div>
+  <h3>Usamos cookies</h3>
+  <p>Esta app guarda una <b>cookie de seguimiento</b> en tu teléfono para recordar qué ejercicios has completado y monitorizar tu actividad de los <b>últimos 15 días</b>. No se comparte con nadie ni sale de tu dispositivo.</p>
+  <div class="cookie-actions">
+    <button class="btn-decline" id="declineCookies">Rechazar</button>
+    <button class="btn-accept" id="acceptCookies">Aceptar y empezar</button>
+  </div>
+</div>
+
+<div class="timer-overlay" id="timerOverlay">
+  <div class="timer-card">
+    <button class="timer-close" id="timerClose">✕</button>
+    <div class="timer-exname" id="timerExName">Ejercicio</div>
+    <div class="timer-setcount" id="timerSetCount">Serie 1 / 4</div>
+    <div class="timer-ring-wrap">
+      <svg class="timer-ring" viewBox="0 0 200 200">
+        <circle class="ring-bg" cx="100" cy="100" r="88"/>
+        <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="88"/>
+      </svg>
+      <div class="timer-center">
+        <div class="timer-phase" id="timerPhase">TRABAJO</div>
+        <div class="timer-num" id="timerNum">35</div>
+      </div>
+    </div>
+    <div class="timer-controls">
+      <button class="tbtn" id="timerPause">⏸ Pausa</button>
+      <button class="tbtn tbtn-skip" id="timerSkip">Saltar ⏭</button>
+    </div>
+  </div>
+</div>
+
+<div class="settings-overlay" id="settingsOverlay">
+  <div class="settings-card">
+    <div class="settings-header">
+      <div class="settings-title">Ajustes</div>
+      <button class="timer-close" id="settingsClose">✕</button>
+    </div>
+
+    <div class="day-nav settings-day-nav" id="settingsDayNav"></div>
+
+    <div class="rest-toggle-row" id="restToggleRow" style="display:none;">
+      <span>Activar entrenamiento este día</span>
+      <label class="switch">
+        <input type="checkbox" id="restToggle">
+        <span class="switch-track"></span>
+      </label>
+    </div>
+
+    <div class="settings-list" id="settingsList"></div>
+
+    <div class="add-ex-form" id="addExForm">
+      <div class="section-label" style="margin-top:4px;">Añadir ejercicio</div>
+      <input type="text" id="newExName" placeholder="Nombre del ejercicio" class="set-input set-input-wide">
+      <div class="add-ex-row">
+        <select id="newExEq" class="set-input">
+          <option value="Mancuernas">Mancuernas</option>
+          <option value="Peso corporal">Peso corporal</option>
+          <option value="Agilidad">Agilidad</option>
+          <option value="Movilidad">Movilidad</option>
+        </select>
+        <input type="number" id="newExSets" class="set-input set-input-num" placeholder="Series" min="1" value="3">
+      </div>
+      <div class="add-ex-row">
+        <input type="number" id="newExWork" class="set-input set-input-num" placeholder="Trabajo (s)" min="1" value="30">
+        <input type="number" id="newExRest" class="set-input set-input-num" placeholder="Descanso (s)" min="0" value="60">
+      </div>
+      <button class="complete-btn ready" id="addExBtn" style="margin-top:10px;">+ Añadir ejercicio</button>
+    </div>
+
+    <button class="reset-link" id="resetPlanBtn">Restaurar plan original de esta semana</button>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  // ---------------- DATA: weekly plan ----------------
+  const WEEKDAYS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+
+  const DEFAULT_PLAN = {
+    0: { title:'Pecho y Tríceps', sub:'Fuerza · Tren superior', isRest:false, exercises:[
+      {n:'Flexiones', s:'4 × 12', eq:'Peso corporal', sets:4, work:35, rest:60},
+      {n:'Press de pecho con mancuernas (suelo)', s:'4 × 12', eq:'Mancuernas', sets:4, work:35, rest:75},
+      {n:'Aperturas con mancuernas', s:'3 × 15', eq:'Mancuernas', sets:3, work:30, rest:60},
+      {n:'Fondos de tríceps en silla', s:'3 × 12', eq:'Peso corporal', sets:3, work:30, rest:60},
+      {n:'Extensión de tríceps sobre la cabeza', s:'3 × 12', eq:'Mancuerna', sets:3, work:30, rest:60},
+      {n:'Plancha', s:'3 × 40s', eq:'Peso corporal', sets:3, work:40, rest:45},
+    ]},
+    1: { title:'Espalda y Bíceps', sub:'Fuerza · Tren superior', isRest:false, exercises:[
+      {n:'Remo con mancuerna a una mano', s:'4 × 12 c/lado', eq:'Mancuernas', sets:4, work:45, rest:75},
+      {n:'Peso muerto rumano con mancuernas', s:'4 × 12', eq:'Mancuernas', sets:4, work:35, rest:75},
+      {n:'Superman', s:'3 × 15', eq:'Peso corporal', sets:3, work:30, rest:45},
+      {n:'Curl de bíceps con mancuernas', s:'4 × 12', eq:'Mancuernas', sets:4, work:35, rest:60},
+      {n:'Curl martillo', s:'3 × 12', eq:'Mancuernas', sets:3, work:30, rest:60},
+      {n:'Plancha lateral', s:'3 × 30s c/lado', eq:'Peso corporal', sets:3, work:60, rest:45},
+    ]},
+    2: { title:'Piernas y Glúteos', sub:'Fuerza · Tren inferior', isRest:false, exercises:[
+      {n:'Sentadillas con mancuernas', s:'4 × 15', eq:'Mancuernas', sets:4, work:40, rest:75},
+      {n:'Zancadas con mancuernas', s:'4 × 12 c/pierna', eq:'Mancuernas', sets:4, work:45, rest:75},
+      {n:'Puente de glúteos', s:'4 × 15', eq:'Peso corporal', sets:4, work:35, rest:60},
+      {n:'Peso muerto rumano a una pierna', s:'3 × 10 c/lado', eq:'Mancuerna', sets:3, work:40, rest:60},
+      {n:'Sentadilla sumo', s:'3 × 15', eq:'Mancuerna', sets:3, work:35, rest:60},
+      {n:'Elevación de talones', s:'3 × 20', eq:'Peso corporal', sets:3, work:30, rest:45},
+    ]},
+    3: { title:'Hombros y Core', sub:'Fuerza · Tren superior', isRest:false, exercises:[
+      {n:'Press militar con mancuernas', s:'4 × 12', eq:'Mancuernas', sets:4, work:35, rest:75},
+      {n:'Elevaciones laterales', s:'4 × 15', eq:'Mancuernas', sets:4, work:35, rest:60},
+      {n:'Elevaciones frontales', s:'3 × 12', eq:'Mancuernas', sets:3, work:30, rest:60},
+      {n:'Pájaros (elevación posterior)', s:'3 × 15', eq:'Mancuernas', sets:3, work:35, rest:60},
+      {n:'Crunch abdominal', s:'3 × 20', eq:'Peso corporal', sets:3, work:35, rest:45},
+      {n:'Plancha con toque de hombro', s:'3 × 30s', eq:'Peso corporal', sets:3, work:30, rest:45},
+    ]},
+    4: { title:'Full Body + Agilidad', sub:'HIIT · 4 rondas', isRest:false, exercises:[
+      {n:'Jumping jacks', s:'4 × 40s', eq:'Agilidad', sets:4, work:40, rest:20},
+      {n:'Burpees', s:'4 × 30s', eq:'Agilidad', sets:4, work:30, rest:20},
+      {n:'Mountain climbers', s:'4 × 40s', eq:'Agilidad', sets:4, work:40, rest:20},
+      {n:'Sentadilla con salto', s:'4 × 30s', eq:'Agilidad', sets:4, work:30, rest:20},
+      {n:'Skater (patinador lateral)', s:'4 × 40s', eq:'Agilidad', sets:4, work:40, rest:20},
+      {n:'Plank jacks', s:'4 × 30s', eq:'Agilidad', sets:4, work:30, rest:20},
+    ]},
+    5: { title:'Movilidad, Core y Agilidad', sub:'Sesión ligera', isRest:false, exercises:[
+      {n:'Desplazamientos laterales en sitio', s:'3 × 40s', eq:'Agilidad', sets:3, work:40, rest:20},
+      {n:'Rodillas altas en sitio (skipping)', s:'3 × 30s', eq:'Agilidad', sets:3, work:30, rest:20},
+      {n:'Plancha', s:'3 × 40s', eq:'Peso corporal', sets:3, work:40, rest:30},
+      {n:'Bicicleta abdominal', s:'3 × 20', eq:'Peso corporal', sets:3, work:35, rest:30},
+      {n:'Movilidad articular general', s:'8 min', eq:'Movilidad', sets:1, work:480, rest:0},
+    ]},
+    6: { title:'Descanso', sub:'Recuperación', isRest:true, exercises:[] },
+  };
+
+  // PLAN es la copia activa y editable (DEFAULT_PLAN + personalizaciones guardadas)
+  let PLAN = {};
+  function clonePlan(){ return JSON.parse(JSON.stringify(DEFAULT_PLAN)); }
+
+  // ---------------- STATE ----------------
+  let consentGiven = false;
+  let selectedDayIdx = null; // 0-6 (Mon-Sun), the day being viewed
+  let todayIdx = null;
+  let settingsDayIdx = null; // día que se está editando en Ajustes
+  let checkedState = {}; // { 'YYYY-MM-DD': { exIndex: true } }
+  let log15 = []; // array of {date:'YYYY-MM-DD', done:bool, isRest:bool}
+
+  function toast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=> t.classList.remove('show'), 1800);
+  }
+
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function dateKey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+  function jsDowToPlanIdx(jsDow){ return (jsDow + 6) % 7; } // JS: 0=Sun..6=Sat -> Plan: 0=Mon..6=Sun
+
+  // ---------------- COOKIE HELPERS (cookies reales del navegador) ----------------
+  function setCookie(name, value, days){
+    const d = new Date();
+    d.setTime(d.getTime() + days*24*60*60*1000);
+    document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + d.toUTCString() + '; path=/; SameSite=Lax';
+  }
+  function getCookie(name){
+    const cname = name + '=';
+    const parts = document.cookie.split(';');
+    for(let c of parts){
+      c = c.trim();
+      if(c.indexOf(cname) === 0) return decodeURIComponent(c.substring(cname.length));
+    }
+    return null;
+  }
+  function deleteCookie(name){
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  }
+
+  // ---------------- STORAGE (guardado en cookies, 30 días de vida) ----------------
+  async function loadState(){
+    const raw = getCookie('forja_checked');
+    try{ checkedState = raw ? JSON.parse(raw) : {}; }
+    catch(e){ checkedState = {}; }
+  }
+  async function saveState(){
+    // Solo guardamos los últimos 20 días para no hinchar la cookie
+    const keys = Object.keys(checkedState).sort();
+    if(keys.length > 20){
+      const toDrop = keys.slice(0, keys.length - 20);
+      toDrop.forEach(k => delete checkedState[k]);
+    }
+    setCookie('forja_checked', JSON.stringify(checkedState), 30);
+  }
+
+  // ---------------- PLAN PERSONALIZADO ----------------
+  function loadPlanCustom(){
+    PLAN = clonePlan();
+    const raw = getCookie('forja_plan_custom');
+    if(!raw) return;
+    try{
+      const data = JSON.parse(raw);
+      Object.keys(data).forEach(k=>{
+        if(PLAN[k]){
+          PLAN[k].exercises = data[k].exercises || [];
+          PLAN[k].isRest = !!data[k].isRest;
+        }
+      });
+    }catch(e){}
+  }
+  function savePlanCustom(){
+    const data = {};
+    for(let i=0;i<7;i++){
+      data[i] = { exercises: PLAN[i].exercises, isRest: PLAN[i].isRest };
+    }
+    setCookie('forja_plan_custom', JSON.stringify(data), 365);
+  }
+  function resetPlanToDefault(){
+    PLAN = clonePlan();
+    deleteCookie('forja_plan_custom');
+  }
+
+  // ---------------- INIT ----------------
+  async function init(){
+    const now = new Date();
+    todayIdx = jsDowToPlanIdx(now.getDay());
+    selectedDayIdx = todayIdx;
+    settingsDayIdx = todayIdx;
+
+    document.getElementById('todayNum').textContent = now.getDate();
+    document.getElementById('todayMeta').textContent = WEEKDAYS[todayIdx].toUpperCase() + ' · ' + now.toLocaleDateString('es-ES',{month:'short'}).replace('.','');
+
+    loadPlanCustom();
+    await loadState();
+    await checkConsent();
+    buildDayNav();
+    renderSession();
+    renderHistory();
+    renderWeekStreak();
+  }
+
+  // ---------------- CONSENT ----------------
+  async function checkConsent(){
+    const v = getCookie('forja_consent');
+    consentGiven = v === 'accepted';
+    if(!v){
+      document.getElementById('cookieBanner').style.display = 'block';
+    }
+  }
+  document.getElementById('acceptCookies').addEventListener('click', ()=>{
+    consentGiven = true;
+    setCookie('forja_consent', 'accepted', 365);
+    document.getElementById('cookieBanner').style.display = 'none';
+    toast('Cookie guardada ✓ seguimiento activo');
+  });
+  document.getElementById('declineCookies').addEventListener('click', ()=>{
+    consentGiven = false;
+    setCookie('forja_consent', 'declined', 365);
+    deleteCookie('forja_checked');
+    checkedState = {};
+    document.getElementById('cookieBanner').style.display = 'none';
+    toast('Sin cookies: el progreso no se guardará');
+  });
+
+  // ---------------- DAY NAV ----------------
+  function buildDayNav(){
+    const nav = document.getElementById('dayNav');
+    nav.innerHTML = '';
+    const now = new Date();
+    for(let i=0;i<7;i++){
+      const pill = document.createElement('div');
+      pill.className = 'day-pill';
+      if(i === selectedDayIdx) pill.classList.add('active');
+      if(i === todayIdx) pill.classList.add('is-today');
+
+      // compute date label for that weekday relative to this week (Mon start)
+      const diff = i - todayIdx;
+      const d = new Date(now);
+      d.setDate(now.getDate() + diff);
+
+      if(isDayComplete(i, d)) pill.classList.add('complete');
+
+      pill.innerHTML = `${WEEKDAYS[i].slice(0,3).toUpperCase()}<span class="num">${d.getDate()}</span>`;
+      pill.addEventListener('click', ()=>{ selectedDayIdx = i; buildDayNav(); renderSession(); });
+      nav.appendChild(pill);
+    }
+  }
+
+  function getDateForPlanIdx(planIdx){
+    const now = new Date();
+    const diff = planIdx - todayIdx;
+    const d = new Date(now);
+    d.setDate(now.getDate() + diff);
+    return d;
+  }
+
+  function isDayComplete(planIdx, dateObj){
+    const day = PLAN[planIdx];
+    if(day.isRest) return false;
+    const key = dateKey(dateObj);
+    const rec = checkedState[key];
+    if(!rec) return false;
+    return day.exercises.every((_, i)=> rec[i]);
+  }
+
+  // ---------------- SESSION RENDER ----------------
+  function renderSession(){
+    const container = document.getElementById('sessionContainer');
+    const day = PLAN[selectedDayIdx];
+    const dateObj = getDateForPlanIdx(selectedDayIdx);
+    const key = dateKey(dateObj);
+    if(!checkedState[key]) checkedState[key] = {};
+
+    if(day.isRest){
+      container.innerHTML = `
+        <div class="session-card rest-card">
+          <div class="glyph">🛌</div>
+          <h2>Día de descanso</h2>
+          <p>Tu cuerpo crece cuando recuperas, no solo cuando entrenas. Aprovecha para estirar un poco o simplemente desconectar.</p>
+        </div>`;
+      return;
+    }
+
+    let exHtml = day.exercises.map((ex, i)=>{
+      const checked = !!checkedState[key][i];
+      const timeLabel = ex.sets > 1
+        ? `${ex.work}s trab. · ${ex.rest}s desc.`
+        : `${Math.round(ex.work/60)} min`;
+      return `
+        <div class="exercise" data-idx="${i}">
+          <div class="check ${checked?'checked':''}" data-idx="${i}">${checked?'✓':''}</div>
+          <div class="ex-info">
+            <div class="ex-name ${checked?'checked':''}">${ex.n}</div>
+            <div class="ex-tags"><span class="ex-tag eq">${ex.eq}</span><span class="ex-tag">⏱ ${timeLabel}</span></div>
+          </div>
+          <div class="ex-scheme">${ex.s}</div>
+        </div>`;
+    }).join('');
+
+    const allDone = day.exercises.every((_, i)=> checkedState[key][i]);
+
+    container.innerHTML = `
+      <div class="session-card">
+        <div class="session-head">
+          <div>
+            <div class="session-title">${day.title}</div>
+            <div class="session-sub">${day.sub}</div>
+          </div>
+          <div class="session-meta">${WEEKDAYS[selectedDayIdx]}<br>${day.exercises.length} ejercicios</div>
+        </div>
+        ${exHtml}
+        <button class="complete-btn ${allDone?'ready':''}" id="finishBtn">${allDone ? '✓ Sesión completada' : 'Marca todos los ejercicios'}</button>
+      </div>`;
+
+    container.querySelectorAll('.check').forEach(el=>{
+      el.addEventListener('click', async (e)=>{
+        e.stopPropagation();
+        const idx = el.getAttribute('data-idx');
+        checkedState[key][idx] = !checkedState[key][idx];
+        await saveState();
+        renderSession();
+        buildDayNav();
+        renderHistory();
+        renderWeekStreak();
+      });
+    });
+
+    container.querySelectorAll('.exercise').forEach(el=>{
+      el.addEventListener('click', (e)=>{
+        if(e.target.closest('.check')) return;
+        const idx = parseInt(el.getAttribute('data-idx'), 10);
+        openTimer(selectedDayIdx, idx);
+      });
+    });
+  }
+
+  // ---------------- HISTORY (15 days) ----------------
+  function renderHistory(){
+    const grid = document.getElementById('historyGrid');
+    grid.innerHTML = '';
+    const now = new Date();
+    let doneCount = 0;
+    let trainableDays = 0;
+
+    for(let offset = 14; offset >= 0; offset--){
+      const d = new Date(now);
+      d.setDate(now.getDate() - offset);
+      const planIdx = jsDowToPlanIdx(d.getDay());
+      const isRest = PLAN[planIdx].isRest;
+      const key = dateKey(d);
+      const done = isDayComplete(planIdx, d);
+
+      if(!isRest){ trainableDays++; if(done) doneCount++; }
+
+      const cell = document.createElement('div');
+      cell.className = 'hist-cell' + (done ? ' done' : (isRest ? ' rest-day' : ''));
+      cell.title = d.toLocaleDateString('es-ES') + (isRest ? ' · descanso' : (done ? ' · completado' : ' · pendiente'));
+      grid.appendChild(cell);
+    }
+
+    document.getElementById('statDone').textContent = doneCount;
+    document.getElementById('statRate').textContent = trainableDays ? Math.round(100*doneCount/trainableDays) + '%' : '0%';
+
+    // streak: count consecutive trainable days (going backwards from today) completed
+    let streak = 0;
+    for(let offset = 0; offset < 30; offset++){
+      const d = new Date(now);
+      d.setDate(now.getDate() - offset);
+      const planIdx = jsDowToPlanIdx(d.getDay());
+      if(PLAN[planIdx].isRest) continue;
+      if(isDayComplete(planIdx, d)) streak++;
+      else break;
+    }
+    document.getElementById('statStreak').textContent = streak;
+
+    const startD = new Date(now); startD.setDate(now.getDate()-14);
+    document.getElementById('histStart').textContent = startD.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+  }
+
+  function renderWeekStreak(){
+    const bar = document.getElementById('weekStreak');
+    bar.innerHTML = '';
+    for(let i=0;i<7;i++){
+      const d = getDateForPlanIdx(i);
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      if(i === todayIdx) dot.classList.add('today');
+      if(isDayComplete(i, d)) dot.classList.add('done');
+      bar.appendChild(dot);
+    }
+  }
+
+  // ---------------- TIMER ENGINE ----------------
+  const RING_CIRC = 552.9; // 2 * PI * 88
+  let timer = {
+    dayIdx: null, exIdx: null, phases: [], phaseIndex: 0,
+    remaining: 0, total: 0, paused: false, intervalId: null
+  };
+
+  function buildPhases(ex){
+    const phases = [];
+    for(let s=1; s<=ex.sets; s++){
+      phases.push({ type:'work', dur: ex.work, setNum: s });
+      if(s < ex.sets && ex.rest > 0){
+        phases.push({ type:'rest', dur: ex.rest, setNum: s });
+      }
+    }
+    return phases;
+  }
+
+  function beep(){
+    try{
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sine';
+      o.frequency.value = 880;
+      g.gain.setValueAtTime(0.15, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      o.start(); o.stop(ctx.currentTime + 0.3);
+    }catch(e){}
+    if(navigator.vibrate) navigator.vibrate(150);
+  }
+
+  function openTimer(dayIdx, exIdx){
+    const ex = PLAN[dayIdx].exercises[exIdx];
+    timer.dayIdx = dayIdx;
+    timer.exIdx = exIdx;
+    timer.phases = buildPhases(ex);
+    timer.phaseIndex = 0;
+    timer.paused = false;
+
+    document.getElementById('timerExName').textContent = ex.n;
+    document.getElementById('timerOverlay').classList.add('show');
+    loadPhase();
+    clearInterval(timer.intervalId);
+    timer.intervalId = setInterval(tickTimer, 1000);
+  }
+
+  function loadPhase(){
+    const ex = PLAN[timer.dayIdx].exercises[timer.exIdx];
+    const phase = timer.phases[timer.phaseIndex];
+    timer.remaining = phase.dur;
+    timer.total = phase.dur;
+
+    const overlay = document.getElementById('timerOverlay');
+    overlay.classList.toggle('resting', phase.type === 'rest');
+    document.getElementById('timerPhase').textContent = phase.type === 'rest' ? 'DESCANSO' : 'TRABAJO';
+    document.getElementById('timerSetCount').textContent = `Serie ${phase.setNum} / ${ex.sets}`;
+    updateRing();
+    beep();
+  }
+
+  function updateRing(){
+    document.getElementById('timerNum').textContent = timer.remaining;
+    const frac = timer.total > 0 ? timer.remaining / timer.total : 0;
+    const offset = RING_CIRC * (1 - frac);
+    document.getElementById('ringFg').style.strokeDashoffset = offset;
+  }
+
+  function tickTimer(){
+    if(timer.paused) return;
+    timer.remaining--;
+    if(timer.remaining <= 0){
+      if(timer.phaseIndex < timer.phases.length - 1){
+        timer.phaseIndex++;
+        loadPhase();
+      } else {
+        finishTimer();
+      }
+      return;
+    }
+    updateRing();
+    if(timer.remaining <= 3) beep();
+  }
+
+  async function finishTimer(){
+    clearInterval(timer.intervalId);
+    document.getElementById('timerPhase').textContent = '¡COMPLETADO!';
+    document.getElementById('timerNum').textContent = '✓';
+    beep();
+
+    const dateObj = getDateForPlanIdx(timer.dayIdx);
+    const key = dateKey(dateObj);
+    if(!checkedState[key]) checkedState[key] = {};
+    checkedState[key][timer.exIdx] = true;
+    await saveState();
+
+    setTimeout(()=>{
+      closeTimer();
+      if(timer.dayIdx === selectedDayIdx) renderSession();
+      buildDayNav();
+      renderHistory();
+      renderWeekStreak();
+      toast('Ejercicio completado ✓');
+    }, 1200);
+  }
+
+  function closeTimer(){
+    clearInterval(timer.intervalId);
+    document.getElementById('timerOverlay').classList.remove('show');
+  }
+
+  document.getElementById('timerClose').addEventListener('click', closeTimer);
+
+  document.getElementById('timerPause').addEventListener('click', ()=>{
+    timer.paused = !timer.paused;
+    document.getElementById('timerPause').textContent = timer.paused ? '▶ Seguir' : '⏸ Pausa';
+  });
+
+  document.getElementById('timerSkip').addEventListener('click', ()=>{
+    if(timer.phaseIndex < timer.phases.length - 1){
+      timer.phaseIndex++;
+      loadPhase();
+    } else {
+      finishTimer();
+    }
+  });
+
+  // ---------------- SETTINGS PANEL ----------------
+  function openSettings(){
+    settingsDayIdx = selectedDayIdx;
+    document.getElementById('settingsOverlay').classList.add('show');
+    renderSettingsDayNav();
+    renderSettingsList();
+  }
+  function closeSettings(){
+    document.getElementById('settingsOverlay').classList.remove('show');
+    // refresca la pantalla principal por si hubo cambios
+    buildDayNav();
+    renderSession();
+    renderHistory();
+    renderWeekStreak();
+  }
+
+  function renderSettingsDayNav(){
+    const nav = document.getElementById('settingsDayNav');
+    nav.innerHTML = '';
+    for(let i=0;i<7;i++){
+      const pill = document.createElement('div');
+      pill.className = 'day-pill';
+      if(i === settingsDayIdx) pill.classList.add('active');
+      pill.textContent = WEEKDAYS[i].slice(0,3).toUpperCase();
+      pill.addEventListener('click', ()=>{
+        settingsDayIdx = i;
+        renderSettingsDayNav();
+        renderSettingsList();
+      });
+      nav.appendChild(pill);
+    }
+  }
+
+  function renderSettingsList(){
+    const day = PLAN[settingsDayIdx];
+    const list = document.getElementById('settingsList');
+    const toggleRow = document.getElementById('restToggleRow');
+    const toggle = document.getElementById('restToggle');
+    const addForm = document.getElementById('addExForm');
+
+    toggleRow.style.display = 'flex';
+    toggle.checked = !day.isRest;
+    addForm.style.display = day.isRest ? 'none' : 'block';
+
+    if(day.isRest){
+      list.innerHTML = `<div class="section-label" style="margin-top:14px;">Día de descanso — actívalo para añadir ejercicios</div>`;
+      return;
+    }
+
+    if(day.exercises.length === 0){
+      list.innerHTML = `<div class="section-label" style="margin-top:14px;">Sin ejercicios todavía. Añade el primero abajo.</div>`;
+    } else {
+      list.innerHTML = day.exercises.map((ex, i)=>`
+        <div class="settings-ex">
+          <div class="settings-ex-head">
+            <input type="text" class="set-input settings-ex-name" data-field="n" data-idx="${i}" value="${ex.n}">
+            <button class="del-btn" data-idx="${i}">🗑</button>
+          </div>
+          <div class="settings-ex-fields">
+            <div class="field-group">
+              <label>Series</label>
+              <input type="number" class="set-input set-input-num" data-field="sets" data-idx="${i}" value="${ex.sets}" min="1">
+            </div>
+            <div class="field-group">
+              <label>Trabajo (s)</label>
+              <input type="number" class="set-input set-input-num" data-field="work" data-idx="${i}" value="${ex.work}" min="1">
+            </div>
+            <div class="field-group">
+              <label>Descanso (s)</label>
+              <input type="number" class="set-input set-input-num" data-field="rest" data-idx="${i}" value="${ex.rest}" min="0">
+            </div>
+          </div>
+        </div>`).join('');
+    }
+
+    // listeners de edición
+    list.querySelectorAll('input[data-field]').forEach(inp=>{
+      inp.addEventListener('change', ()=>{
+        const idx = parseInt(inp.getAttribute('data-idx'), 10);
+        const field = inp.getAttribute('data-field');
+        const ex = PLAN[settingsDayIdx].exercises[idx];
+        if(field === 'n'){
+          ex.n = inp.value.trim() || ex.n;
+        } else {
+          let v = parseInt(inp.value, 10);
+          if(isNaN(v) || v < 0) v = 0;
+          ex[field] = v;
+        }
+        savePlanCustom();
+        toast('Cambios guardados ✓');
+      });
+    });
+
+    list.querySelectorAll('.del-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = parseInt(btn.getAttribute('data-idx'), 10);
+        PLAN[settingsDayIdx].exercises.splice(idx, 1);
+        savePlanCustom();
+        renderSettingsList();
+        toast('Ejercicio eliminado');
+      });
+    });
+  }
+
+  document.getElementById('openSettings').addEventListener('click', openSettings);
+  document.getElementById('settingsClose').addEventListener('click', closeSettings);
+
+  document.getElementById('restToggle').addEventListener('change', (e)=>{
+    const day = PLAN[settingsDayIdx];
+    day.isRest = !e.target.checked;
+    if(!day.isRest && !day.title) day.title = 'Entrenamiento personalizado';
+    savePlanCustom();
+    renderSettingsList();
+  });
+
+  document.getElementById('addExBtn').addEventListener('click', ()=>{
+    const nameInp = document.getElementById('newExName');
+    const name = nameInp.value.trim();
+    if(!name){ toast('Ponle un nombre al ejercicio'); return; }
+    const eq = document.getElementById('newExEq').value;
+    let sets = parseInt(document.getElementById('newExSets').value, 10) || 1;
+    let work = parseInt(document.getElementById('newExWork').value, 10) || 20;
+    let rest = parseInt(document.getElementById('newExRest').value, 10) || 0;
+
+    const scheme = sets > 1 ? `${sets} × ${work}s` : `${work}s`;
+    PLAN[settingsDayIdx].exercises.push({ n:name, s:scheme, eq:eq, sets:sets, work:work, rest:rest });
+
+    nameInp.value = '';
+    document.getElementById('newExSets').value = 3;
+    document.getElementById('newExWork').value = 30;
+    document.getElementById('newExRest').value = 60;
+
+    savePlanCustom();
+    renderSettingsList();
+    toast('Ejercicio añadido ✓');
+  });
+
+  document.getElementById('resetPlanBtn').addEventListener('click', ()=>{
+    if(!confirm('¿Restaurar el plan original de todos los días? Se perderán tus ejercicios añadidos o modificados.')) return;
+    resetPlanToDefault();
+    renderSettingsDayNav();
+    renderSettingsList();
+    toast('Plan restaurado ✓');
+  });
+
+  init();
+})();
+</script>
+
+</body>
+</html>
