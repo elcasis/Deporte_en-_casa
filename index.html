@@ -32,7 +32,7 @@
     color: var(--paper);
     font-family: var(--font-body);
     min-height:100vh;
-    padding-bottom: 40px;
+    padding-bottom: 92px;
   }
 
   /* ---------- Display type built from condensed system stack ---------- */
@@ -114,6 +114,85 @@
   }
   .streak-bar .dot.done{ background: var(--ember); border-color: var(--ember); }
   .streak-bar .dot.today{ box-shadow: 0 0 0 2px var(--gold) inset; }
+
+  /* ---------- MAIN TABS (barra inferior fija) ---------- */
+  .main-tabs{
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    display:flex;
+    gap: 8px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    background: rgba(20,17,15,0.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--line);
+    z-index: 900;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .main-tab{
+    flex:1;
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    gap: 2px;
+    padding: 8px 6px;
+    border-radius: 12px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--iron);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .main-tab-icon{ font-size: 17px; line-height: 1; }
+  .main-tab.active{
+    background: var(--card);
+    border-color: var(--line);
+    color: var(--ember);
+  }
+
+  /* ---------- WEIGHT INPUT ---------- */
+  .ex-kg{
+    display:flex; align-items:center; gap:4px;
+    margin-top: 4px;
+  }
+  .ex-kg input{
+    width: 50px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--gold);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 5px;
+    text-align: center;
+  }
+  .ex-kg input:focus{ outline:none; border-color: var(--ember); }
+  .ex-kg label{
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--iron);
+    text-transform: uppercase;
+  }
+
+  /* ---------- HISTORY / CHART VIEW ---------- */
+  .chart-empty{
+    text-align:center; padding: 50px 20px; color: var(--iron); font-size: 13px;
+  }
+  .chart-card{
+    background: linear-gradient(180deg, var(--card), var(--bg-soft));
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .chart-stats{
+    display:flex; gap:10px; margin-top:14px;
+  }
+  .chart-svg{ width:100%; height:auto; display:block; }
 
   /* ---------- DAY NAV ---------- */
   .day-nav{
@@ -349,7 +428,7 @@
   /* ---------- COOKIE BANNER ---------- */
   .cookie-banner{
     position: fixed;
-    left: 12px; right: 12px; bottom: 12px;
+    left: 12px; right: 12px; bottom: 84px;
     background: var(--bg-soft);
     border: 1px solid var(--ember);
     border-radius: 16px;
@@ -690,23 +769,42 @@
   <div class="streak-bar" id="weekStreak"></div>
 </header>
 
-<nav class="day-nav" id="dayNav"></nav>
+<div id="viewTrain">
+  <nav class="day-nav" id="dayNav"></nav>
 
-<main>
-  <div id="sessionContainer"></div>
+  <main>
+    <div id="sessionContainer"></div>
 
-  <div class="section-label">Últimos 15 días</div>
-  <div class="history-grid" id="historyGrid"></div>
-  <div class="hist-labels"><span id="histStart">hace 15 días</span><span>hoy</span></div>
+    <div class="section-label">Últimos 15 días</div>
+    <div class="history-grid" id="historyGrid"></div>
+    <div class="hist-labels"><span id="histStart">hace 15 días</span><span>hoy</span></div>
 
-  <div class="stats-row">
-    <div class="stat"><div class="num" id="statStreak">0</div><div class="lbl">Racha actual</div></div>
-    <div class="stat"><div class="num" id="statDone">0</div><div class="lbl">Sesiones / 15d</div></div>
-    <div class="stat"><div class="num" id="statRate">0%</div><div class="lbl">Cumplimiento</div></div>
-  </div>
-</main>
+    <div class="stats-row">
+      <div class="stat"><div class="num" id="statStreak">0</div><div class="lbl">Racha actual</div></div>
+      <div class="stat"><div class="num" id="statDone">0</div><div class="lbl">Sesiones / 15d</div></div>
+      <div class="stat"><div class="num" id="statRate">0%</div><div class="lbl">Cumplimiento</div></div>
+    </div>
+  </main>
+</div>
+
+<div id="viewHistory" style="display:none;">
+  <main>
+    <div class="section-label">Progresión de peso · últimos 3 meses</div>
+    <select id="histExerciseSelect" class="set-input" style="margin-bottom:16px;"></select>
+    <div id="weightChartContainer"></div>
+  </main>
+</div>
 
 <footer>FORJA · entrenamiento de habitación · mancuernas + peso corporal</footer>
+
+<nav class="main-tabs" id="mainTabs">
+  <button class="main-tab active" data-view="train">
+    <span class="main-tab-icon">🏋</span><span>Entreno</span>
+  </button>
+  <button class="main-tab" data-view="history">
+    <span class="main-tab-icon">📈</span><span>Histórico</span>
+  </button>
+</nav>
 
 <div class="cookie-banner" id="cookieBanner" style="display:none;">
   <div class="ico">🍪</div>
@@ -791,33 +889,33 @@
   const DEFAULT_PLAN = {
     0: { title:'Pecho y Tríceps', sub:'Fuerza · Tren superior', isRest:false, exercises:[
       {n:'Flexiones', s:'4 × 12', eq:'Peso corporal', sets:4, work:35, rest:60},
-      {n:'Press de pecho con mancuernas (suelo)', s:'4 × 12', eq:'Mancuernas', sets:4, work:35, rest:75},
-      {n:'Aperturas con mancuernas', s:'3 × 15', eq:'Mancuernas', sets:3, work:30, rest:60},
+      {n:'Press de pecho con mancuernas (suelo)', s:'4 × 12', eq:'Mancuernas', sets:4, work:35, rest:75, kg:8},
+      {n:'Aperturas con mancuernas', s:'3 × 15', eq:'Mancuernas', sets:3, work:30, rest:60, kg:6},
       {n:'Fondos de tríceps en silla', s:'3 × 12', eq:'Peso corporal', sets:3, work:30, rest:60},
-      {n:'Extensión de tríceps sobre la cabeza', s:'3 × 12', eq:'Mancuerna', sets:3, work:30, rest:60},
+      {n:'Extensión de tríceps sobre la cabeza', s:'3 × 12', eq:'Mancuerna', sets:3, work:30, rest:60, kg:6},
       {n:'Plancha', s:'3 × 40s', eq:'Peso corporal', sets:3, work:40, rest:45},
     ]},
     1: { title:'Espalda y Bíceps', sub:'Fuerza · Tren superior', isRest:false, exercises:[
-      {n:'Remo con mancuerna a una mano', s:'4 × 12 c/lado', eq:'Mancuernas', sets:4, work:45, rest:75},
-      {n:'Peso muerto rumano con mancuernas', s:'4 × 12', eq:'Mancuernas', sets:4, work:35, rest:75},
+      {n:'Remo con mancuerna a una mano', s:'4 × 12 c/lado', eq:'Mancuernas', sets:4, work:45, rest:75, kg:8},
+      {n:'Peso muerto rumano con mancuernas', s:'4 × 12', eq:'Mancuernas', sets:4, work:35, rest:75, kg:10},
       {n:'Superman', s:'3 × 15', eq:'Peso corporal', sets:3, work:30, rest:45},
-      {n:'Curl de bíceps con mancuernas', s:'4 × 12', eq:'Mancuernas', sets:4, work:35, rest:60},
-      {n:'Curl martillo', s:'3 × 12', eq:'Mancuernas', sets:3, work:30, rest:60},
+      {n:'Curl de bíceps con mancuernas', s:'4 × 12', eq:'Mancuernas', sets:4, work:35, rest:60, kg:6},
+      {n:'Curl martillo', s:'3 × 12', eq:'Mancuernas', sets:3, work:30, rest:60, kg:6},
       {n:'Plancha lateral', s:'3 × 30s c/lado', eq:'Peso corporal', sets:3, work:60, rest:45},
     ]},
     2: { title:'Piernas y Glúteos', sub:'Fuerza · Tren inferior', isRest:false, exercises:[
-      {n:'Sentadillas con mancuernas', s:'4 × 15', eq:'Mancuernas', sets:4, work:40, rest:75},
-      {n:'Zancadas con mancuernas', s:'4 × 12 c/pierna', eq:'Mancuernas', sets:4, work:45, rest:75},
+      {n:'Sentadillas con mancuernas', s:'4 × 15', eq:'Mancuernas', sets:4, work:40, rest:75, kg:10},
+      {n:'Zancadas con mancuernas', s:'4 × 12 c/pierna', eq:'Mancuernas', sets:4, work:45, rest:75, kg:8},
       {n:'Puente de glúteos', s:'4 × 15', eq:'Peso corporal', sets:4, work:35, rest:60},
-      {n:'Peso muerto rumano a una pierna', s:'3 × 10 c/lado', eq:'Mancuerna', sets:3, work:40, rest:60},
-      {n:'Sentadilla sumo', s:'3 × 15', eq:'Mancuerna', sets:3, work:35, rest:60},
+      {n:'Peso muerto rumano a una pierna', s:'3 × 10 c/lado', eq:'Mancuerna', sets:3, work:40, rest:60, kg:6},
+      {n:'Sentadilla sumo', s:'3 × 15', eq:'Mancuerna', sets:3, work:35, rest:60, kg:10},
       {n:'Elevación de talones', s:'3 × 20', eq:'Peso corporal', sets:3, work:30, rest:45},
     ]},
     3: { title:'Hombros y Core', sub:'Fuerza · Tren superior', isRest:false, exercises:[
-      {n:'Press militar con mancuernas', s:'4 × 12', eq:'Mancuernas', sets:4, work:35, rest:75},
-      {n:'Elevaciones laterales', s:'4 × 15', eq:'Mancuernas', sets:4, work:35, rest:60},
-      {n:'Elevaciones frontales', s:'3 × 12', eq:'Mancuernas', sets:3, work:30, rest:60},
-      {n:'Pájaros (elevación posterior)', s:'3 × 15', eq:'Mancuernas', sets:3, work:35, rest:60},
+      {n:'Press militar con mancuernas', s:'4 × 12', eq:'Mancuernas', sets:4, work:35, rest:75, kg:6},
+      {n:'Elevaciones laterales', s:'4 × 15', eq:'Mancuernas', sets:4, work:35, rest:60, kg:4},
+      {n:'Elevaciones frontales', s:'3 × 12', eq:'Mancuernas', sets:3, work:30, rest:60, kg:4},
+      {n:'Pájaros (elevación posterior)', s:'3 × 15', eq:'Mancuernas', sets:3, work:35, rest:60, kg:4},
       {n:'Crunch abdominal', s:'3 × 20', eq:'Peso corporal', sets:3, work:35, rest:45},
       {n:'Plancha con toque de hombro', s:'3 × 30s', eq:'Peso corporal', sets:3, work:30, rest:45},
     ]},
@@ -861,6 +959,7 @@
   function pad(n){ return n.toString().padStart(2,'0'); }
   function dateKey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
   function jsDowToPlanIdx(jsDow){ return (jsDow + 6) % 7; } // JS: 0=Sun..6=Sat -> Plan: 0=Mon..6=Sun
+  function isWeighted(ex){ return ex.eq === 'Mancuernas' || ex.eq === 'Mancuerna'; }
 
   // ---------------- COOKIE HELPERS (cookies reales del navegador) ----------------
   function setCookie(name, value, days){
@@ -924,6 +1023,46 @@
     deleteCookie('forja_plan_custom');
   }
 
+  // ---------------- HISTÓRICO DE PESO (progresión) ----------------
+  let weightLog = {}; // { 'Nombre ejercicio': [{d:'YYYY-MM-DD', kg:10}, ...] }
+
+  function loadWeightLog(){
+    const raw = getCookie('forja_weight_log');
+    try{ weightLog = raw ? JSON.parse(raw) : {}; }
+    catch(e){ weightLog = {}; }
+  }
+
+  function saveWeightLog(){
+    // recorta cada ejercicio a los últimos 100 registros para no hinchar la cookie
+    Object.keys(weightLog).forEach(name=>{
+      if(weightLog[name].length > 100){
+        weightLog[name] = weightLog[name].slice(weightLog[name].length - 100);
+      }
+    });
+    setCookie('forja_weight_log', JSON.stringify(weightLog), 400);
+  }
+
+  function logWeight(name, kg){
+    const today = dateKey(new Date());
+    if(!weightLog[name]) weightLog[name] = [];
+    const arr = weightLog[name];
+    const existing = arr.find(e => e.d === today);
+    if(existing){ existing.kg = kg; }
+    else { arr.push({ d: today, kg: kg }); }
+    arr.sort((a,b)=> a.d < b.d ? -1 : (a.d > b.d ? 1 : 0));
+    saveWeightLog();
+  }
+
+  function getAllWeightedExerciseNames(){
+    const names = new Set();
+    for(let i=0;i<7;i++){
+      PLAN[i].exercises.forEach(ex=>{ if(isWeighted(ex)) names.add(ex.n); });
+    }
+    // incluye también nombres que solo existan en el histórico (por si se eliminó el ejercicio del plan)
+    Object.keys(weightLog).forEach(n=> names.add(n));
+    return Array.from(names);
+  }
+
   // ---------------- INIT ----------------
   async function init(){
     const now = new Date();
@@ -935,12 +1074,14 @@
     document.getElementById('todayMeta').textContent = WEEKDAYS[todayIdx].toUpperCase() + ' · ' + now.toLocaleDateString('es-ES',{month:'short'}).replace('.','');
 
     loadPlanCustom();
+    loadWeightLog();
     await loadState();
     await checkConsent();
     buildDayNav();
     renderSession();
     renderHistory();
     renderWeekStreak();
+    initTabs();
   }
 
   // ---------------- CONSENT ----------------
@@ -1030,12 +1171,20 @@
       const timeLabel = ex.sets > 1
         ? `${ex.work}s trab. · ${ex.rest}s desc.`
         : `${Math.round(ex.work/60)} min`;
+      const weighted = isWeighted(ex);
+      const kgHtml = weighted ? `
+            <div class="ex-kg">
+              <label>Peso</label>
+              <input type="number" class="kg-input" data-idx="${i}" value="${ex.kg != null ? ex.kg : ''}" step="0.5" min="0" placeholder="kg" inputmode="decimal">
+              <label>kg</label>
+            </div>` : '';
       return `
         <div class="exercise" data-idx="${i}">
           <div class="check ${checked?'checked':''}" data-idx="${i}">${checked?'✓':''}</div>
           <div class="ex-info">
             <div class="ex-name ${checked?'checked':''}">${ex.n}</div>
             <div class="ex-tags"><span class="ex-tag eq">${ex.eq}</span><span class="ex-tag">⏱ ${timeLabel}</span></div>
+            ${kgHtml}
           </div>
           <div class="ex-scheme">${ex.s}</div>
         </div>`;
@@ -1069,9 +1218,25 @@
       });
     });
 
+    container.querySelectorAll('.kg-input').forEach(el=>{
+      el.addEventListener('click', (e)=> e.stopPropagation());
+      el.addEventListener('change', (e)=>{
+        e.stopPropagation();
+        const idx = parseInt(el.getAttribute('data-idx'), 10);
+        let v = parseFloat(el.value);
+        if(isNaN(v) || v < 0) v = 0;
+        const ex = PLAN[selectedDayIdx].exercises[idx];
+        ex.kg = v;
+        savePlanCustom();
+        logWeight(ex.n, v);
+        toast(`Peso guardado: ${v} kg`);
+      });
+    });
+
     container.querySelectorAll('.exercise').forEach(el=>{
       el.addEventListener('click', (e)=>{
         if(e.target.closest('.check')) return;
+        if(e.target.closest('.ex-kg')) return;
         const idx = parseInt(el.getAttribute('data-idx'), 10);
         openTimer(selectedDayIdx, idx);
       });
@@ -1387,7 +1552,7 @@
     let rest = parseInt(document.getElementById('newExRest').value, 10) || 0;
 
     const scheme = sets > 1 ? `${sets} × ${work}s` : `${work}s`;
-    PLAN[settingsDayIdx].exercises.push({ n:name, s:scheme, eq:eq, sets:sets, work:work, rest:rest });
+    PLAN[settingsDayIdx].exercises.push({ n:name, s:scheme, eq:eq, sets:sets, work:work, rest:rest, kg: (eq==='Mancuernas'||eq==='Mancuerna') ? 0 : undefined });
 
     nameInp.value = '';
     document.getElementById('newExSets').value = 3;
@@ -1406,6 +1571,130 @@
     renderSettingsList();
     toast('Plan restaurado ✓');
   });
+
+  // ---------------- TABS: ENTRENO / HISTÓRICO ----------------
+  let currentView = 'train';
+
+  function initTabs(){
+    document.querySelectorAll('.main-tab').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        currentView = btn.getAttribute('data-view');
+        document.querySelectorAll('.main-tab').forEach(b=> b.classList.toggle('active', b===btn));
+        document.getElementById('viewTrain').style.display = currentView === 'train' ? '' : 'none';
+        document.getElementById('viewHistory').style.display = currentView === 'history' ? '' : 'none';
+        if(currentView === 'history') renderHistoryView();
+      });
+    });
+  }
+
+  function renderHistoryView(){
+    const select = document.getElementById('histExerciseSelect');
+    const names = getAllWeightedExerciseNames();
+    const prevValue = select.value;
+
+    select.innerHTML = names.map(n=> `<option value="${n.replace(/"/g,'&quot;')}">${n}</option>`).join('');
+    if(names.length === 0){
+      document.getElementById('weightChartContainer').innerHTML =
+        `<div class="chart-empty">Todavía no tienes ejercicios con mancuernas en tu plan.<br>Añade peso a un ejercicio en la pestaña Entreno para empezar a ver tu progresión aquí.</div>`;
+      return;
+    }
+    // mantiene la selección previa si sigue existiendo, si no usa la primera
+    select.value = names.includes(prevValue) ? prevValue : names[0];
+
+    select.onchange = ()=> renderWeightChart(select.value);
+    renderWeightChart(select.value);
+  }
+
+  function renderWeightChart(exerciseName){
+    const container = document.getElementById('weightChartContainer');
+    const log = weightLog[exerciseName] || [];
+
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 90);
+    const cutoffKey = dateKey(cutoff);
+    const points = log.filter(e => e.d >= cutoffKey).sort((a,b)=> a.d < b.d ? -1 : (a.d > b.d ? 1 : 0));
+
+    if(points.length === 0){
+      container.innerHTML = `<div class="chart-empty">Aún no hay registros de peso para <b style="color:var(--paper)">${exerciseName}</b> en los últimos 3 meses.<br>Cámbialo en la pestaña Entreno para empezar a verlo aquí.</div>`;
+      return;
+    }
+
+    if(points.length === 1){
+      container.innerHTML = `
+        <div class="chart-card">
+          <div class="chart-empty" style="padding:30px 10px;">
+            Solo hay un registro todavía: <b style="color:var(--gold)">${points[0].kg} kg</b> (${formatShortDate(points[0].d)}).<br>
+            Sigue actualizando el peso en cada sesión para ver la curva de progresión.
+          </div>
+        </div>`;
+      return;
+    }
+
+    const W = 320, H = 180, padL = 34, padR = 14, padT = 16, padB = 26;
+    const kgs = points.map(p=>p.kg);
+    let minKg = Math.min(...kgs), maxKg = Math.max(...kgs);
+    if(minKg === maxKg){ minKg -= 1; maxKg += 1; }
+    const rangeKg = maxKg - minKg;
+    minKg = Math.max(0, minKg - rangeKg*0.15);
+    maxKg = maxKg + rangeKg*0.15;
+
+    const x = (i)=> padL + (i/(points.length-1)) * (W-padL-padR);
+    const y = (kg)=> (H-padB) - ((kg-minKg)/(maxKg-minKg)) * (H-padT-padB);
+
+    const linePath = points.map((p,i)=> `${i===0?'M':'L'}${x(i).toFixed(1)},${y(p.kg).toFixed(1)}`).join(' ');
+    const areaPath = `${linePath} L${x(points.length-1).toFixed(1)},${(H-padB)} L${x(0).toFixed(1)},${(H-padB)} Z`;
+
+    // líneas de cuadrícula horizontales (3 niveles)
+    let gridLines = '';
+    for(let g=0; g<=2; g++){
+      const gy = padT + (g/2)*(H-padT-padB);
+      const kgVal = (maxKg - (g/2)*(maxKg-minKg)).toFixed(1);
+      gridLines += `<line x1="${padL}" y1="${gy}" x2="${W-padR}" y2="${gy}" stroke="var(--line)" stroke-width="1" stroke-dasharray="2 4"/>`;
+      gridLines += `<text x="${padL-6}" y="${gy+3}" font-size="8" fill="var(--iron)" font-family="monospace" text-anchor="end">${kgVal}</text>`;
+    }
+
+    // etiquetas de fecha: primera, intermedia y última
+    let dateLabels = '';
+    const labelIdxs = points.length <= 2 ? [0, points.length-1] : [0, Math.floor((points.length-1)/2), points.length-1];
+    labelIdxs.forEach(i=>{
+      dateLabels += `<text x="${x(i)}" y="${H-8}" font-size="8" fill="var(--iron)" font-family="monospace" text-anchor="middle">${formatShortDate(points[i].d)}</text>`;
+    });
+
+    const dots = points.map((p,i)=> `<circle cx="${x(i)}" cy="${y(p.kg)}" r="3.5" fill="var(--ember)" stroke="var(--bg)" stroke-width="1.5"/>`).join('');
+
+    const first = points[0].kg, last = points[points.length-1].kg;
+    const diff = last - first;
+    const diffLabel = diff === 0 ? 'Sin cambios' : (diff > 0 ? `+${diff.toFixed(1)} kg` : `${diff.toFixed(1)} kg`);
+    const diffColor = diff > 0 ? 'var(--ok)' : (diff < 0 ? 'var(--ember)' : 'var(--iron)');
+
+    container.innerHTML = `
+      <div class="chart-card">
+        <svg class="chart-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--ember)" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="var(--ember)" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          ${gridLines}
+          <path d="${areaPath}" fill="url(#areaGrad)"/>
+          <path d="${linePath}" fill="none" stroke="var(--ember)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          ${dots}
+          ${dateLabels}
+        </svg>
+        <div class="chart-stats">
+          <div class="stat"><div class="num" style="font-size:18px;">${first} kg</div><div class="lbl">Hace 3 meses</div></div>
+          <div class="stat"><div class="num" style="font-size:18px;">${last} kg</div><div class="lbl">Actual</div></div>
+          <div class="stat"><div class="num" style="font-size:18px; color:${diffColor};">${diffLabel}</div><div class="lbl">Progresión</div></div>
+        </div>
+      </div>`;
+  }
+
+  function formatShortDate(dStr){
+    const [y,m,d] = dStr.split('-').map(Number);
+    const dt = new Date(y, m-1, d);
+    return dt.toLocaleDateString('es-ES', {day:'numeric', month:'short'}).replace('.','');
+  }
 
   init();
 })();
